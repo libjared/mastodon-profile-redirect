@@ -13,7 +13,40 @@ const go = () => {
 				return;
 			}
 
-			const tryAndGetUserName = () => {
+			if (isViewingPost()) {
+				/* https://front-end.social/authorize_interaction?uri=${encodeURIComponent(window.location.href)} */
+				/* Navigating to this URL has different effects based on whether the target uri is a post vs a profile. */
+				/* For post, it redirects as you'd expect. */
+				/* For profile, it prompts to follow in a simple UI fitting for a popup. */
+
+				/* Redirect to the post. */
+				const encodedTarget = encodeURIComponent(window.location.href);
+				const newUrl = `https://${WEB_DOMAIN}/authorize_interaction?uri=${encodedTarget}`;
+				window.location.href = newUrl;
+			} else {
+				let user = tryAndGetUserName();
+
+				if (!user) return;
+
+				/* Trim off @domain suffix in case it matches with LOCAL_DOMAIN. This due to https://github.com/mastodon/mastodon/issues/21469 */
+				if (user.endsWith(`@${LOCAL_DOMAIN}`)) {
+					user = user.substring(0, user.length - `@${LOCAL_DOMAIN}`.length);
+				}
+
+				/* Redirect to the profile. */
+				window.location.href = `https://${WEB_DOMAIN}/@${user}`;
+			}
+
+			function isViewingPost() {
+				const type = document.querySelector('meta[property="og:type"]');
+				if (type === null) {
+					// shrug!
+					return false;
+				}
+				return type.content === 'article';
+			}
+
+			function tryAndGetUserName() {
 				/* Profile with a moved banner (e.g. https://mastodon.social/@bramus): follow that link */
 				const userNewProfile = document.querySelector('.moved-account-banner .button')?.getAttribute('href');
 				if (userNewProfile) {
@@ -34,17 +67,7 @@ const go = () => {
 				if (userFromDetailPage) return userFromDetailPage.substring(1);
 
 				return null;
-			};
-
-			let user = tryAndGetUserName();
-			if (!user) return;
-
-			/* Trim off @domain suffix in case it matches with LOCAL_DOMAIN. This due to https://github.com/mastodon/mastodon/issues/21469 */
-			if (user.endsWith(`@${LOCAL_DOMAIN}`)) {
-				user = user.substring(0, user.length - `@${LOCAL_DOMAIN}`.length);
 			}
-
-			window.location.href = `https://${WEB_DOMAIN}/@${user}`;
 		}
 	);
 };
