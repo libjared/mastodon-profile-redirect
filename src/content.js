@@ -48,11 +48,21 @@ if (isMostLikelyMastodon) {
 							// Change title to reflect user’s Masto instance
 							$existingHeader.innerText = `On ${LOCAL_DOMAIN}`;
 
+							const pageType = document.querySelector('meta[property="og:type"]');
+							const isViewingPost = pageType !== null && pageType.content === 'article';
+
 							// Create view profile button
 							const $viewButton = document.createElement('a');
 							$viewButton.classList.add('button', 'button--block');
-							$viewButton.href = `https://${WEB_DOMAIN}/@${user}`;
-							$viewButton.innerText = 'View Profile';
+							if (isViewingPost) {
+								$viewButton.innerText = 'View Post';
+								const encodedTarget = encodeURIComponent(window.location.href);
+								const newUrl = `https://${WEB_DOMAIN}/authorize_interaction?uri=${encodedTarget}`;
+								$viewButton.href = newUrl;
+							} else {
+								$viewButton.innerText = 'View Profile';
+								$viewButton.href = `https://${WEB_DOMAIN}/@${user}`;
+							}
 
 							// Replace the orig paragraph with the show profile button
 							$existingParagraph.insertAdjacentElement('beforebegin', $viewButton);
