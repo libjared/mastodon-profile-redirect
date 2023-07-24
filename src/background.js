@@ -5,11 +5,11 @@ const go = () => {
 			web_domain: '',
 		},
 		function (items) {
-			const MY_MASTO_LOCAL_DOMAIN = items.local_domain;
-			const MY_MASTO_WEB_DOMAIN = items.web_domain || MY_MASTO_LOCAL_DOMAIN;
+			const LOCAL_DOMAIN = items.local_domain;
+			const WEB_DOMAIN = items.web_domain || LOCAL_DOMAIN;
 
-			if (!MY_MASTO_LOCAL_DOMAIN) {
-				alert('Please go to options and set your MY_MASTO_LOCAL_DOMAIN first');
+			if (!LOCAL_DOMAIN) {
+				alert('Please go to options and set your LOCAL_DOMAIN first');
 				return;
 			}
 
@@ -25,7 +25,7 @@ const go = () => {
 				const userFromProfilePage = document.querySelector('meta[property="profile:username"]')?.getAttribute('content') || document.querySelector('.account__header .account__header__tabs__name small')?.innerText.substring(1);
 				if (userFromProfilePage) {
 					/* Don’t return if already watching on own LOCAL_DOMAIN instance */
-					if (window.location.host === MY_MASTO_LOCAL_DOMAIN) return null;
+					if (window.location.host === LOCAL_DOMAIN) return null;
 					return userFromProfilePage;
 				}
 
@@ -39,12 +39,12 @@ const go = () => {
 			let user = tryAndGetUserName();
 			if (!user) return;
 
-			/* Trim off @domain suffix in case it matches with MY_MASTO_LOCAL_DOMAIN. This due to https://github.com/mastodon/mastodon/issues/21469 */
-			if (user.endsWith(`@${MY_MASTO_LOCAL_DOMAIN}`)) {
-				user = user.substring(0, user.length - `@${MY_MASTO_LOCAL_DOMAIN}`.length);
+			/* Trim off @domain suffix in case it matches with LOCAL_DOMAIN. This due to https://github.com/mastodon/mastodon/issues/21469 */
+			if (user.endsWith(`@${LOCAL_DOMAIN}`)) {
+				user = user.substring(0, user.length - `@${LOCAL_DOMAIN}`.length);
 			}
 
-			window.location.href = `https://${MY_MASTO_WEB_DOMAIN}/@${user}`;
+			window.location.href = `https://${WEB_DOMAIN}/@${user}`;
 		}
 	);
 };
