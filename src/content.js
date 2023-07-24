@@ -8,8 +8,10 @@ if (isMostLikelyMastodon) {
 			mutations_list.forEach(function (mutation) {
 				if (!mutation.addedNodes.length) return;
 
-				const $profileUrlInput = document.querySelector('.modal-root .copypaste input[type="text"]');
-				if (!$profileUrlInput) return;
+				// This could be a profile URL or a post URL, depending on the interaction
+				// by the user that made this modal pop up in the first place
+				const $urlInput = document.querySelector('.modal-root .copypaste input[type="text"]');
+				if (!$urlInput) return;
 
 				// Get username
 				// First try the username meta tag. However, sometimes Mastodon forgets to inject it,
@@ -17,7 +19,7 @@ if (isMostLikelyMastodon) {
 				let user = document.querySelector('meta[property="profile:username"]')?.getAttribute('content') || document.querySelector('.account__header .account__header__tabs__name small')?.innerText.substring(1);
 				if (!user) return;
 
-				$choiceBox = $profileUrlInput.closest('.interaction-modal__choices__choice');
+				$choiceBox = $urlInput.closest('.interaction-modal__choices__choice');
 				if (!$choiceBox) return;
 
 				if ($choiceBox.dataset.redirectModificationsState !== 'done') {
