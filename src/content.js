@@ -50,18 +50,24 @@ if (isMostLikelyMastodon) {
 							// Change title to reflect user’s Masto instance
 							$existingHeader.innerText = `On ${LOCAL_DOMAIN}`;
 
-							const pageType = document.querySelector('meta[property="og:type"]');
-							const isViewingPost = pageType !== null && pageType.content === 'article';
+							// Note: in contrast to redirecting based on the window.location, as we do in the background script, instead here we're aiming to redirect based on the interaction just taken.
+							// Did the user just try to follow? Redirect to the profile.
+							// Did the user just try to boost or fav? Redirect to the post in question.
+							// We won't be reading window.location here, because there's no guarantee the user just interacted with the same item the window is navigated to.
+							const urlInputValue = $urlInput.value;
+							const isInteractingWithPost = urlInputValue.match(/[0-9]+$/) !== null;
 
-							// Create view profile button
+							// Create view profile/post button
 							const $viewButton = document.createElement('a');
 							$viewButton.classList.add('button', 'button--block');
-							if (isViewingPost) {
+							if (isInteractingWithPost) {
+								// User trying to interact with a post, so redirect to the post rather than the author's profile
 								$viewButton.innerText = 'View Post';
-								const encodedTarget = encodeURIComponent(window.location.href);
+								const encodedTarget = encodeURIComponent(urlInputValue);
 								const newUrl = `https://${WEB_DOMAIN}/authorize_interaction?uri=${encodedTarget}`;
 								$viewButton.href = newUrl;
 							} else {
+								// User trying to interact with profile, so redirect to profile
 								$viewButton.innerText = 'View Profile';
 								$viewButton.href = `https://${WEB_DOMAIN}/@${user}`;
 							}
