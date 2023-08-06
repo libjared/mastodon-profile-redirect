@@ -61,3 +61,7 @@ run-firefox:
 	@printf "\e[1m\e[94m♺ Launching Firefox …\e[0m\n"
 	@web-ext run &>/dev/null &
 	@printf "\e[1m\e[32m✔ Done\e[0m\n\n"
+
+clean:
+	@yes | rm -rf "${BUILD_DIR}"
+	@yes | rm -rf "${DIST_DIR}"
