@@ -12,41 +12,6 @@ function logError(...data) {
   console.error('[ERROR] Mastodon Redirector:', ...data);
 }
 
-if ($mastodon) {
-  logInfo('Mastodon Redirector is running.');
-
-  chrome.storage.sync.get(
-    {
-      local_domain: '',
-      web_domain: '',
-    },
-    (items) => {
-      LOCAL_DOMAIN = items.local_domain;
-      WEB_DOMAIN = items.web_domain || LOCAL_DOMAIN;
-
-      const $initialModalRoot = $mastodon.querySelector('.modal-root');
-      if ($initialModalRoot) {
-        foundModalRoot($initialModalRoot);
-      } else {
-        const observerModalRoot = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (!mutation.addedNodes.length) return;
-
-            const $modalRoot = $mastodon.querySelector('.modal-root');
-
-            if ($modalRoot) {
-              observerModalRoot.disconnect();
-              foundModalRoot($modalRoot);
-            }
-          });
-        });
-
-        observerModalRoot.observe($mastodon, { subtree: true, childList: true });
-      }
-    },
-  );
-}
-
 function foundModalRoot($modalRoot) {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -141,3 +106,39 @@ function foundModalRoot($modalRoot) {
 
   observer.observe($modalRoot, { subtree: true, childList: true });
 }
+
+async function begin() {
+  if ($mastodon) {
+    logInfo('Mastodon Redirector is running.');
+
+    const items = await chrome.storage.sync.get({
+      local_domain: '',
+      web_domain: '',
+    });
+
+    LOCAL_DOMAIN = items.local_domain;
+    WEB_DOMAIN = items.web_domain || LOCAL_DOMAIN;
+
+    const $initialModalRoot = $mastodon.querySelector('.modal-root');
+    if ($initialModalRoot) {
+      foundModalRoot($initialModalRoot);
+    } else {
+      const observerModalRoot = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (!mutation.addedNodes.length) return;
+
+          const $modalRoot = $mastodon.querySelector('.modal-root');
+
+          if ($modalRoot) {
+            observerModalRoot.disconnect();
+            foundModalRoot($modalRoot);
+          }
+        });
+      });
+
+      observerModalRoot.observe($mastodon, { subtree: true, childList: true });
+    }
+  }
+}
+
+begin();
