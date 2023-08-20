@@ -113,13 +113,6 @@ function processModalTwoColumn() {
   $existingParagraph.style.display = 'none';
 }
 
-function processModalOneColumn() {
-  // find modal root and login textbox
-  const $modalRoot = document.querySelector('.modal-root');
-
-  // TODO: replace hint text
-}
-
 function foundModalRoot($modalRoot) {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -133,7 +126,7 @@ function foundModalRoot($modalRoot) {
 
       if (isPopupOneColumn) {
         logInfo('Found modal, one-column variant');
-        processModalOneColumn();
+        // no need to process; storeHome() is sufficient
       } else if (isPopupTwoColumn) {
         logInfo('Found modal, two-column variant');
         processModalTwoColumn();
