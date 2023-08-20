@@ -19,5 +19,9 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
   },
-  rules: {},
+  rules: {
+    'no-param-reassign': [2, {
+      props: false,
+    }],
+  },
 };

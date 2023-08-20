@@ -26,6 +26,12 @@ function getTargetUsername() {
   return document.querySelector('meta[property="profile:username"]')?.getAttribute('content') || document.querySelector('.account__header .account__header__tabs__name small')?.innerText.substring(1);
 }
 
+function setInnerText(element, newText) {
+  if (element.innerText !== newText) {
+    element.innerText = newText;
+  }
+}
+
 function processModalTwoColumn() {
   // This could be a profile URL or a post URL, depending on the interaction
   // by the user that made this modal pop up in the first place
@@ -49,23 +55,26 @@ function processModalTwoColumn() {
   }
 
   const $existingParagraph = $choiceBox.querySelector('p');
-  const $existingHeader = $choiceBox.querySelector('h3 span');
+  const $existingParagraphText = $existingParagraph.querySelector('span');
+  const $existingHeaderText = $choiceBox.querySelector('h3 span');
 
   if (!$existingParagraph) {
     logError('$existingParagraph not found');
     return;
   }
-  if (!$existingHeader) {
-    logError('$existingHeader not found');
+  if (!$existingParagraphText) {
+    logError('$existingParagraphText not found');
+    return;
+  }
+  if (!$existingHeaderText) {
+    logError('$existingHeaderText not found');
     return;
   }
 
   // Not configured? Show a notification.
   if (!WEB_DOMAIN) {
-    const newText = 'Please configure the mastodon-profile-redirect browser extension to more easily follow this account, directly on your Mastodon instance.';
-    if ($existingParagraph.innerText !== newText) {
-      $existingParagraph.innerText = newText;
-    }
+    setInnerText($existingParagraphText, 'Please configure the mastodon-profile-redirect browser extension to more easily follow this account, directly on your Mastodon instance.');
+    $existingParagraph.style.display = '';
     return;
   }
 
@@ -75,33 +84,33 @@ function processModalTwoColumn() {
   }
 
   // Change title to reflect user’s Masto instance
-  const newText = `On ${LOCAL_DOMAIN}`;
-  if ($existingHeader.innerText !== newText) {
-    $existingHeader.innerText = newText;
-  }
+  setInnerText($existingHeaderText, `On ${LOCAL_DOMAIN}`);
 
   const urlInputValue = $urlInput.value;
   const isInteractingWithPost = urlInputValue.match(/[0-9]+$/) !== null;
 
-  // Create view profile/post button
-  const $viewButton = document.createElement('a');
-  $viewButton.classList.add('button', 'button--block');
+  // Create/get "View Profile/Post" button
+  let $viewButton = $choiceBox.querySelector('.mastodon-redirector__button');
+  if ($viewButton === null) {
+    $viewButton = document.createElement('a');
+    $viewButton.classList.add('button', 'button--block', 'mastodon-redirector__button');
+    $existingParagraph.insertAdjacentElement('beforebegin', $viewButton);
+  }
   if (isInteractingWithPost) {
     // User trying to interact with a post, so redirect to the post rather than
     // the author's profile
-    $viewButton.innerText = 'View Post';
+    setInnerText($viewButton, 'View Post');
     const encodedTarget = encodeURIComponent(urlInputValue);
     const newUrl = `https://${WEB_DOMAIN}/authorize_interaction?uri=${encodedTarget}`;
     $viewButton.href = newUrl;
   } else {
     // User trying to interact with profile, so redirect to profile
-    $viewButton.innerText = 'View Profile';
+    setInnerText($viewButton, 'View Profile');
     $viewButton.href = `https://${WEB_DOMAIN}/@${user}`;
   }
 
-  // Replace the orig paragraph with the show profile button
-  $existingParagraph.insertAdjacentElement('beforebegin', $viewButton);
-  $choiceBox.removeChild($existingParagraph);
+  // Hide the copy-paste-this paragraph
+  $existingParagraph.style.display = 'none';
 }
 
 function processModalOneColumn() {
